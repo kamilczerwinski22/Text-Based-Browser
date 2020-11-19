@@ -34,4 +34,18 @@ Twitter and Square Chief Executive Officer Jack Dorsey
  Tuesday, a signal of the strong ties between the Silicon Valley giants.
 '''
 
-# write your code here
+# MAIN LOOP
+def main():
+    while True:
+        user_input = input()
+        if user_input == 'bloomberg.com':
+            print(bloomberg_com)
+        elif user_input == 'nytimes.com':
+            print(nytimes_com)
+        elif user_input == 'exit':
+            exit()
+        else:
+            pass
+
+main()
+
