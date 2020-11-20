@@ -67,19 +67,22 @@ def main():
 
     while True:
         user_input = input()
-        if user_input == 'exit':
+
+        if user_input == 'exit':  # exit
             exit()
-        elif check_input(user_input):
+        elif check_input(user_input):  # check input validity
             print(ERROR_TEXT)
-        elif user_input == 'bloomberg.com':
+        elif os.path.isfile(catalog_name + '\\' + crop_after_last_dot(user_input)):  # second read
+            with open(catalog_name + '\\' + crop_after_last_dot(user_input), 'r+') as f:
+                for line in f.readlines():
+                    print(line.strip())
+        elif user_input == 'bloomberg.com':  # first occurence of bloomberg
             print(bloomberg_com)
             write_to_file(crop_after_last_dot('bloomberg.com'), catalog_name, bloomberg_com)
-        elif user_input == 'nytimes.com':
+        elif user_input == 'nytimes.com':  # first occurence of nytimes
             print(nytimes_com)
             write_to_file(crop_after_last_dot('nytimes.com'), catalog_name, nytimes_com)
-        else:
+        else:  # error else
             print(ERROR_TEXT)
 
 main()
-prio
-
