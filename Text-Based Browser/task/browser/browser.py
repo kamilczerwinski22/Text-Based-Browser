@@ -1,3 +1,6 @@
+import sys
+import os
+
 
 nytimes_com = '''
 This New Liquid Is Magnetic, and Mesmerizing
@@ -34,18 +37,49 @@ Twitter and Square Chief Executive Officer Jack Dorsey
  Tuesday, a signal of the strong ties between the Silicon Valley giants.
 '''
 
+catalog_name = sys.argv[1]
+ERROR_TEXT = 'FFS, Error again!'
+
+
+def crop_after_last_dot(string):
+    """Function for croping website link"""
+    return string[:len(string) - 1 - string[::-1].index('.')]
+
+def check_input(string):
+    """Function for checking input validity"""
+    return string.count('.') == 0
+
+def write_to_file(file_name, catalog_name, file_inside):
+    """Function for writing content to file"""
+    with open(catalog_name + '\\' + file_name, 'a+') as f:
+        f.write(file_inside)
+
+
 # MAIN LOOP
 def main():
+
+    # create folder
+    try:
+        os.mkdir(catalog_name)
+    except FileExistsError:
+        print("Directory ", catalog_name, " already exists")
+
+
     while True:
         user_input = input()
-        if user_input == 'bloomberg.com':
+        if user_input == 'exit':
+            exit()
+        elif check_input(user_input):
+            print(ERROR_TEXT)
+        elif user_input == 'bloomberg.com':
             print(bloomberg_com)
+            write_to_file(crop_after_last_dot('bloomberg.com'), catalog_name, bloomberg_com)
         elif user_input == 'nytimes.com':
             print(nytimes_com)
-        elif user_input == 'exit':
-            exit()
+            write_to_file(crop_after_last_dot('nytimes.com'), catalog_name, nytimes_com)
         else:
-            pass
+            print(ERROR_TEXT)
 
 main()
+prio
 
