@@ -1,60 +1,26 @@
 import sys
 import os
 from collections import deque
-
-nytimes_com = '''
-This New Liquid Is Magnetic, and Mesmerizing
-
-Scientists have created “soft” magnets that can flow 
-and change shape, and that could be a boon to medicine 
-and robotics. (Source: New York Times)
-
-
-Most Wikipedia Profiles Are of Men. This Scientist Is Changing That.
-
-Jessica Wade has added nearly 700 Wikipedia biographies for
- important female and minority scientists in less than two 
- years.
-
-'''
-
-bloomberg_com = '''
-The Space Race: From Apollo 11 to Elon Musk
-
-It's 50 years since the world was gripped by historic images
- of Apollo 11, and Neil Armstrong -- the first man to walk 
- on the moon. It was the height of the Cold War, and the charts
- were filled with David Bowie's Space Oddity, and Creedence's 
- Bad Moon Rising. The world is a very different place than 
- it was 5 decades ago. But how has the space race changed since
- the summer of '69? (Source: Bloomberg)
-
-
-Twitter CEO Jack Dorsey Gives Talk at Apple Headquarters
-
-Twitter and Square Chief Executive Officer Jack Dorsey 
- addressed Apple Inc. employees at the iPhone maker’s headquarters
- Tuesday, a signal of the strong ties between the Silicon Valley giants.
-'''
+import requests
 
 catalog_name = sys.argv[1]
 ERROR_TEXT = 'FFS, Error again!'
 
 
-def crop_after_last_dot(string):
+def crop_after_last_dot(string: str) -> str:
     """Function for croping website link from last dot. If string doesn't containg dot, return input string"""
     try:
         return string[:len(string) - 1 - string[::-1].index('.')]
     except ValueError:
         return string
 
-def check_input(string):
+def check_input(string: str) -> bool:
     """Function for checking input validity"""
     return string.count('.') == 0
 
-def write_to_file(file_name, catalog_name, file_inside):
+def write_to_file(file_name: str, catalog_name: str, file_inside: str):
     """Function for writing content to file"""
-    with open(catalog_name + '\\' + file_name, 'a+') as f:
+    with open(os.path.join(catalog_name, file_name), 'a+', encoding='UTF-8') as f:
         f.write(file_inside)
 
 
@@ -73,7 +39,13 @@ def main():
 
     while True:
         user_input = input()
-        user_input_without_last_dot = crop_after_last_dot(user_input)
+        user_input_cropped = crop_after_last_dot(user_input.replace('https://', '')
+                                                           .replace('http://', '')
+                                                           .replace('www.', ''))
+        user_input_request = user_input if user_input.startswith('https://') else ('https://' + user_input)
+
+        print('file', os.path.join(catalog_name, user_input_cropped))
+        print('file if true', os.path.isfile(os.path.join(catalog_name, user_input_cropped)))
         if user_input == 'exit':  # exit
             exit()
 
@@ -85,7 +57,7 @@ def main():
                 second_arg = stack.pop()
 
                 # read content of second to last argument
-                with open(catalog_name + '\\' + second_arg, 'r+') as f:
+                with open(os.path.join(catalog_name, second_arg), 'r+') as f:
                     for line in f.readlines():
                         print(line.strip())
 
@@ -99,23 +71,36 @@ def main():
         elif check_input(user_input):  # check input validity
             print(ERROR_TEXT)
 
-        elif os.path.isfile(catalog_name + '\\' + user_input_without_last_dot):  # second read of content
-            stack.append(user_input_without_last_dot)
-            with open(catalog_name + '\\' + user_input_without_last_dot, 'r+') as f:
+        elif os.path.isfile(os.path.join(catalog_name, user_input_cropped)):  # second read of content
+            stack.append(user_input_cropped)
+            with open(os.path.join(catalog_name, user_input_cropped), 'r+', encoding='UTF-8') as f:
                 for line in f.readlines():
                     print(line.strip())
 
-        elif user_input == 'bloomberg.com':  # first occurence of bloomberg
-            print(bloomberg_com)
-            write_to_file(crop_after_last_dot('bloomberg.com'), catalog_name, bloomberg_com)
-            stack.append(crop_after_last_dot('bloomberg.com'))
+        else:
+            request = requests.get(user_input_request)
+            print(request.text)
+            write_to_file(file_name=user_input_cropped,
+                          catalog_name=catalog_name,
+                          file_inside=request.text)
+            stack.append(user_input_cropped)
 
-        elif user_input == 'nytimes.com':  # first occurence of nytimes
-            print(nytimes_com)
-            write_to_file(crop_after_last_dot('nytimes.com'), catalog_name, nytimes_com)
-            stack.append(crop_after_last_dot('nytimes.com'))
 
-        else:  # error else
-            print(ERROR_TEXT)
+        # elif user_input == 'bloomberg.com':  # first occurence of bloomberg
+        #     print(bloomberg_com)
+        #     write_to_file(crop_after_last_dot('bloomberg.com'),
+        #                   catalog_name,
+        #                   bloomberg_com)
+        #     stack.append(crop_after_last_dot('bloomberg.com'))
+        #
+        # elif user_input == 'nytimes.com':  # first occurence of nytimes
+        #     print(nytimes_com)
+        #     write_to_file(crop_after_last_dot('nytimes.com'),
+        #                   catalog_name,
+        #                   nytimes_com)
+        #     stack.append(crop_after_last_dot('nytimes.com'))
+        #
+        # else:  # error else
+        #     print(ERROR_TEXT)
 
 main()
