@@ -4,10 +4,12 @@ from collections import deque
 import requests
 from bs4 import BeautifulSoup
 from requests import Response
+from colorama import Fore, Style, init as colorama_init
 
 catalog_name = sys.argv[1]
 ERROR_TEXT = 'FFS, Error again!'
 
+colorama_init(autoreset=True)
 
 def crop_after_last_dot(string: str) -> str:
     """Function for croping website link from last dot. If string doesn't containg dot, return input string"""
@@ -26,7 +28,10 @@ def write_to_file(file_name: str, catalog_name: str, file_inside: Response):
         soup = BeautifulSoup(file_inside.content, 'html.parser')
         results = soup.find_all(['p', 'a', 'ul', 'ol', 'li'])
         for tag in results:
-            f.write(f"{tag.text}")
+            if tag.name == 'a':
+                f.write(Fore.BLUE + tag.text)
+            else:
+                f.write(tag.text)
 
 def pretty_print(catalog_name, file_name):
     """Function for printing file."""
