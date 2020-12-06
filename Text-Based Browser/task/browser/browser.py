@@ -1,15 +1,14 @@
 import sys
 import os
-from collections import deque
 import requests
+from collections import deque
 from bs4 import BeautifulSoup
-from requests import Response
-from colorama import Fore, Style, init as colorama_init
+from colorama import Fore, init as colorama_init
 
 catalog_name = sys.argv[1]
 ERROR_TEXT = 'FFS, Error again!'
 
-colorama_init(autoreset=True)
+colorama_init(autoreset=True)  # initialize colorama
 
 def crop_after_last_dot(string: str) -> str:
     """Function for croping website link from last dot. If string doesn't containg dot, return input string"""
@@ -22,14 +21,14 @@ def check_input(string: str) -> bool:
     """Function for checking input validity"""
     return string.count('.') == 0
 
-def write_to_file(file_name: str, catalog_name: str, file_inside: Response):
+def write_to_file(file_name: str, catalog_name: str, file_inside: requests.Response):
     """Function for writing content to file"""
     with open(os.path.join(catalog_name, file_name), 'a+', encoding='UTF-8') as f:
         soup = BeautifulSoup(file_inside.content, 'html.parser')
-        results = soup.find_all(['p', 'a', 'ul', 'ol', 'li'])
+        results = soup.find_all(['p', 'a', 'ul', 'ol', 'li'])  # we only look for this tags
         for tag in results:
             if tag.name == 'a':
-                f.write(Fore.BLUE + tag.text)
+                f.write(Fore.BLUE + tag.text)  # if tag is a ling (<a>), make it blue
             else:
                 f.write(tag.text)
 
@@ -38,9 +37,6 @@ def pretty_print(catalog_name, file_name):
     with open(os.path.join(catalog_name, file_name), 'r+', encoding='UTF-8') as f:
         for line in f.readlines():
             print(line.strip())
-
-
-
 
 # MAIN LOOP
 def main():
@@ -90,7 +86,7 @@ def main():
             pretty_print(catalog_name=catalog_name,
                          file_name=user_input_cropped)
 
-        else:
+        else:  # add content to file if it doesn't exist
             request = requests.get(user_input_request)
             write_to_file(file_name=user_input_cropped,
                           catalog_name=catalog_name,
@@ -100,5 +96,6 @@ def main():
 
             stack.append(user_input_cropped)
 
+# Run as script
 if __name__ == '__main__':
     main()
